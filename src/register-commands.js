@@ -5,50 +5,19 @@ const { REST, Routes, ApplicationCommandOptionType } = require('discord.js')
 const commands = [
     {
         name: 'add',
-        description: 'Adds two Number',
+        description: 'Add a movie with its preference value',
         options: [
             {
-                name: 'first_number',
-                description: 'The first number',
-                type: ApplicationCommandOptionType.Number,
-                choices: [
-                    {
-                        name: 'one',
-                        value: 1,
-                    },
-                    {
-                        name: 'two',
-                        value: 2,
-                    },
-                    {
-                        name: 'three',
-                        value: 3,
-                    }
-                ],
+                name: 'moviename',
+                description: 'Add your movie with your preference value from 1-10',
+                type: ApplicationCommandOptionType.String,
                 required: true,
-                
             },
-            {
-                name: 'second_number',
-                description: 'The second number',
-                type: ApplicationCommandOptionType.Number,
-                choices: [
-                    {
-                        name: 'one',
-                        value: 1,
-                    },
-                    {
-                        name: 'two',
-                        value: 2,
-                    },
-                    {
-                        name: 'three',
-                        value: 3,
-                    }
-                ],
-                required: true,
-            }
         ]
+    },
+    {
+        name: 'watchlist',
+        description: 'Shows your current watchlist',
     },
 ]
 

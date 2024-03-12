@@ -1,6 +1,9 @@
 require('dotenv').config();
 
-const { Client, IntentsBitField } = require('discord.js')
+const { Client, IntentsBitField, moveElementInArray } = require('discord.js')
+
+// const arr= [];
+const watchLists = new Map()
 
 const client = new Client({
     intents: [
@@ -11,23 +14,37 @@ const client = new Client({
     ]
 })
 
+
 client.on("ready", (c) => {
     console.log(`${c.user.tag} is online`)
 })
 
 client.on('interactionCreate', (interaction) => {
+
+
     if (!interaction.isChatInputCommand()) 
         return;
 
+    const userId = interaction.user.id
+
+
     if (interaction.commandName === 'add'){
-        const num1 = interaction.options.get('first_number')?.value;
-        const num2 = interaction.options.get('second_number')?.value;
-        
-        interaction.reply(`The Sum of the numbers is ${num1 + num2}`);  
+        const userMovieName = interaction.options.getString('moviename');
+        const userWatchList = watchLists.get(userId) || [] 
+        userWatchList.push(userMovieName)
+        // console.log(userMovieName)
+        watchLists.set(userId, userWatchList)
+        interaction.reply(`<@${userId}> Your movie **${userMovieName}** was added to your watchlist`);
     }
+    if (interaction.commandName === 'watchlist'){
+        const userWatchList = watchLists.get(userId) || [];
 
-
-
+        let stlyedWatchlist = "Your current watchlist:\n"
+        userWatchList.forEach((movie, index) => {
+            stlyedWatchlist += `\```${index + 1}. **${movie}**\```\n`            
+        });
+        interaction.reply(`<@${userId}> Your current watchlist ${stlyedWatchlist}`);
+    }
 })
 
 client.login(process.env.Discord_token)

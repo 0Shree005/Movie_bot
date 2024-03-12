@@ -8,9 +8,15 @@ const commands = [
         description: 'Add a movie with its preference value',
         options: [
             {
-                name: 'moviename',
-                description: 'Add your movie with your preference value from 1-10',
+                name: 'movie_name',
+                description: 'Add Movie name',
                 type: ApplicationCommandOptionType.String,
+                required: true,
+            },
+            {
+                name: 'preference_value',
+                description: 'Add movie`s preference value from 1-10',
+                type: ApplicationCommandOptionType.Number,
                 required: true,
             },
         ]

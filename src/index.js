@@ -29,9 +29,11 @@ client.on('interactionCreate', (interaction) => {
 
 
     if (interaction.commandName === 'add'){
-        const userMovieName = interaction.options.getString('moviename');
+        const userMovieName = interaction.options.getString('movie_name');
+        const userMoviePref = interaction.options.getNumber('preference_value');
+        console.log(interaction.options)
         const userWatchList = watchLists.get(userId) || [] 
-        userWatchList.push(userMovieName)
+        userWatchList.push({ name: userMovieName, preference: userMoviePref })
         // console.log(userMovieName)
         watchLists.set(userId, userWatchList)
         interaction.reply(`<@${userId}> Your movie **${userMovieName}** was added to your watchlist`);
@@ -39,11 +41,11 @@ client.on('interactionCreate', (interaction) => {
     if (interaction.commandName === 'watchlist'){
         const userWatchList = watchLists.get(userId) || [];
 
-        let stlyedWatchlist = "Your current watchlist:\n"
+        let styledWatchlist = "Your current watchlist:\n"
         userWatchList.forEach((movie, index) => {
-            stlyedWatchlist += `\```${index + 1}. **${movie}**\```\n`            
+            styledWatchlist += `${index + 1}. **${movie.name}** (Preference: ${movie.preference})\n`            
         });
-        interaction.reply(`<@${userId}> Your current watchlist ${stlyedWatchlist}`);
+        interaction.reply(`<@${userId}> Your current watchlist ${styledWatchlist}`);
     }
 })
 

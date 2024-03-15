@@ -8,17 +8,17 @@ const mongoose = require('mongoose');
 mongoose.connect(process.env.DATABASE);
 
 const movieSchema = new mongoose.Schema({
-    movie_name: String,
-    preference_value: Number
+    username: String,
+    movie_name: [{
+        type: mongoose.Schema.Types.String,
+    }],
+    preference_value: [{
+        type: mongoose.Schema.Types.Number,
+    }],
 });
 
-// Creating a model for movies
-// const UserChoice = new DiscordMovies({ 
-//     movie_name: userMovieName,
-//     preference_value: userMoviePref
-// });
 
-const Movie = mongoose.model('Movie', movieSchema);
+const UserMovie = mongoose.model('User Movies', movieSchema);
 
 // Initialising Discord Permissions
 const client = new Client({
@@ -41,26 +41,29 @@ client.on('interactionCreate', async (interaction) => {
         return;
 
     const userId = interaction.user.id
-
     
     // "/add"
     if (interaction.commandName === 'add'){
         const userMovieName = interaction.options.getString('movie_name');
         const userMoviePref = interaction.options.getNumber('preference_value');
+        if (!(UserMovie.find(userId))){
+            await UserMovie.create({ username: userId, movie_name: userMovieName, preference_value: userMoviePref});
+        }
+        else{
+            UserMovie.updateOne(
+                { username: userId },
+                { $push: { movie_name: userMovieName, preference_value: userMoviePref } }
+            )
+        }
+        await UserMovie.create({ movie_name: userMovieName, preference_value: userMoviePref});
 
-        await Movie.create({ movie_name: userMovieName, preference_value: userMoviePref});
-        // const userWatchList = watchLists.get(userId) || [] 
-        // userWatchList.push({ name: userMovieName, preference: userMoviePref })
-
-        // console.log(userWatchList)
-        // watchLists.set(userId, userWatchList)
-        interaction.reply(`<@${userId}> Your movie **${userMovieName}** was added to your watchlist`);
+        interaction.reply(`<@${userId}> Your movie **${userMovieName}** with Preference of **${userMoviePref}** was added to your watchlist`);
     }
 
     // "/watchlist"
     if (interaction.commandName === 'watchlist'){
 
-        const userMovies = await Movie.find({})
+        const userMovies = await UserMovie.find({userId})
 
         let styledWatchlist = "Your current watchlist:\n"
         userMovies.forEach((movie, index) => {

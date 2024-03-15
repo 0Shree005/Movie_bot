@@ -30,7 +30,7 @@ const commands = [
 const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_TOKEN);
 (async () => {
     try {
-        console.log('Registering slash commands...')
+        console.log('Registering slash commands...');
 
         await rest.put(
             Routes.applicationGuildCommands(
@@ -40,9 +40,9 @@ const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_TOKEN);
             {body: commands}
         )
 
-        console.log('Slash commands were registerd succesfully!')
+        console.log('Slash commands were registerd succesfully!');
 
     } catch (error) {
-        console.log(`There was an error: ${error}`)
+        console.log(`There was an error: ${error}`);
     }
 }) ();

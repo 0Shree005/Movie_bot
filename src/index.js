@@ -1,24 +1,17 @@
-require('dotenv').config();
+import dotenv from 'dotenv';
+dotenv.config();
 
-const { Client, IntentsBitField } = require('discord.js')
-const mongoose = require('mongoose');
-
-
-// Connect to Database 
-mongoose.connect(process.env.DATABASE);
-
-const movieSchema = new mongoose.Schema({
-    username: String,
-    movie_name: [{
-        type: mongoose.Schema.Types.String,
-    }],
-    preference_value: [{
-        type: mongoose.Schema.Types.Number,
-    }],
-});
+import { Client, IntentsBitField }  from 'discord.js';
+import { MongoClient }  from 'mongodb';
+import mongoose  from 'mongoose';
 
 
-const UserMovie = mongoose.model('User Movies', movieSchema);
+//importing Functions 
+import findOneUserByName from './utils/findOneUserByName.js';
+import connectToDatabase from './utils/connectToDatabase.js';
+import createMovie from './utils/createMovie.js';
+import upsertMovieByName from './utils/upsertUserWatchlist.js';
+
 
 // Initialising Discord Permissions
 const client = new Client({
@@ -31,8 +24,8 @@ const client = new Client({
 })
 
 // Conformation for Bot's status
-client.on("ready", (c) => {
-    console.log(`${c.user.tag} is online`)
+client.on("ready", () => {
+    console.log(`${client.user.tag} is online`)
 })
 
 // Functionality of Custom Slash commands
@@ -41,36 +34,41 @@ client.on('interactionCreate', async (interaction) => {
         return;
 
     const userId = interaction.user.id
-    
+    const userMovieName = interaction.options.getString('movie_name');
+    const userMoviePref = interaction.options.getNumber('preference_value');
     // "/add"
     if (interaction.commandName === 'add'){
-        const userMovieName = interaction.options.getString('movie_name');
-        const userMoviePref = interaction.options.getNumber('preference_value');
-        if (!(UserMovie.find(userId))){
-            await UserMovie.create({ username: userId, movie_name: userMovieName, preference_value: userMoviePref});
-        }
-        else{
-            UserMovie.updateOne(
-                { username: userId },
-                { $push: { movie_name: userMovieName, preference_value: userMoviePref } }
-            )
-        }
-        await UserMovie.create({ movie_name: userMovieName, preference_value: userMoviePref});
-
-        interaction.reply(`<@${userId}> Your movie **${userMovieName}** with Preference of **${userMoviePref}** was added to your watchlist`);
+        try {
+            const dbClient = await connectToDatabase();
+            const replyMessage = await upsertMovieByName(dbClient, userId, userMovieName, userMoviePref);
+            interaction.reply(replyMessage);
+        } catch (error) {
+            console.log('Error adding movie:', error);
+            interaction.reply('There was an error while adding the movie. Please try again later.');
+        }   
     }
 
     // "/watchlist"
     if (interaction.commandName === 'watchlist'){
+        try {
+            const dbClient = await connectToDatabase();
+            const [movieNames, prefValues] = await findOneUserByName(dbClient, userId);
 
-        const userMovies = await UserMovie.find({userId})
-
-        let styledWatchlist = "Your current watchlist:\n"
-        userMovies.forEach((movie, index) => {
-            styledWatchlist += `${index + 1}. **${movie.name}** (Preference: ${movie.preference})\n`            
-        });
-        interaction.reply(`<@${userId}> Your current watchlist ${styledWatchlist}`);
+            if (movieNames && prefValues) {
+                const watchlistItems = movieNames.map((movie, index) => {
+                    return `${index + 1}. **${movie}** - **${prefValues[index]}**`;
+                });
+                
+                const watchlistMessage = watchlistItems.join('\n');
+                interaction.reply(`<@${userId}> Your current watchlist {Movie - Preference}:\n${watchlistMessage}`);
+            } else {
+                interaction.reply(`<@${userId}> Your watchlist is empty.`);
+            }
+        } catch (error) {
+            console.log('Error searching for the watchlist:', error);
+            interaction.reply('There was an error while searching for your watchlist. Please try again later.');
+        } 
     }
 })
 
-client.login(process.env.Discord_token)
+client.login(process.env.Discord_token);

@@ -8,6 +8,7 @@ export default async function findOneUserByName(Mongoclient, userId) {
         return [result.movie_name, result.pref_val];
     } else {
         console.log(`No movie found with the user ID '${userId}'`)
+        console.log(`${result} from else block find function`)
         return null;
     }
 }

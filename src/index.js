@@ -2,18 +2,18 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import { Client, IntentsBitField }  from 'discord.js';
-import { MongoClient }  from 'mongodb';
-import mongoose  from 'mongoose';
 
+/**
+ * importing custom slash commands
+ */
+// "/add"
+import addCmd from './utils/Custom_Commands/addCmd.js';
+// "/watchlist"
+import watchlistCmd from './utils/Custom_Commands/watchlistCmd.js';
 
-//importing Functions 
-import findOneUserByName from './utils/findOneUserByName.js';
-import connectToDatabase from './utils/connectToDatabase.js';
-import createMovie from './utils/createMovie.js';
-import upsertMovieByName from './utils/upsertUserWatchlist.js';
-
-
-// Initialising Discord Permissions
+/**
+ * Initialising Discord Permissions
+ */ 
 const client = new Client({
     intents: [
         IntentsBitField.Flags.Guilds,
@@ -36,38 +36,15 @@ client.on('interactionCreate', async (interaction) => {
     const userId = interaction.user.id
     const userMovieName = interaction.options.getString('movie_name');
     const userMoviePref = interaction.options.getNumber('preference_value');
+    
     // "/add"
     if (interaction.commandName === 'add'){
-        try {
-            const dbClient = await connectToDatabase();
-            const replyMessage = await upsertMovieByName(dbClient, userId, userMovieName, userMoviePref);
-            interaction.reply(replyMessage);
-        } catch (error) {
-            console.log('Error adding movie:', error);
-            interaction.reply('There was an error while adding the movie. Please try again later.');
-        }   
+        await addCmd(interaction, userId, userMovieName, userMoviePref);
     }
 
     // "/watchlist"
-    if (interaction.commandName === 'watchlist'){
-        try {
-            const dbClient = await connectToDatabase();
-            const [movieNames, prefValues] = await findOneUserByName(dbClient, userId);
-
-            if (movieNames && prefValues) {
-                const watchlistItems = movieNames.map((movie, index) => {
-                    return `${index + 1}. **${movie}** - **${prefValues[index]}**`;
-                });
-                
-                const watchlistMessage = watchlistItems.join('\n');
-                interaction.reply(`<@${userId}> Your current watchlist {Movie - Preference}:\n${watchlistMessage}`);
-            } else {
-                interaction.reply(`<@${userId}> Your watchlist is empty.`);
-            }
-        } catch (error) {
-            console.log('Error searching for the watchlist:', error);
-            interaction.reply('There was an error while searching for your watchlist. Please try again later.');
-        } 
+    if (interaction.commandName === 'watchlist') {
+        await watchlistCmd(interaction, userId);
     }
 })
 

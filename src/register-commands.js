@@ -1,6 +1,7 @@
-require('dotenv').config();
+import dotenv from 'dotenv';
+dotenv.config();
 
-const { REST, Routes, ApplicationCommandOptionType } = require('discord.js') 
+import { REST, Routes, ApplicationCommandOptionType } from 'discord.js'
 
 const commands = [
     {
@@ -25,6 +26,23 @@ const commands = [
         name: 'watchlist',
         description: 'Shows your current watchlist',
     },
+    {
+        name: 'delete',
+        description: 'Deletes *ONE* Movie from your Watchlist',
+        options: [
+            {
+                name: 'movie_name',
+                description: 'Add Movie name',
+                type: ApplicationCommandOptionType.String,
+                required: true,
+            }, 
+        ]
+    },
+    {
+        name: 'delete_watchlist',
+        description: 'Deletes your *ENTIRE* Watchlist',
+    },
+
 ]
 
 const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_TOKEN);

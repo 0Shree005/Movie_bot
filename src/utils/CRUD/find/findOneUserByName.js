@@ -1,6 +1,9 @@
 // function to find user movies
 export default async function findOneUserByName(Mongoclient, userId) {
-    const result = await Mongoclient.db("test").collection("user_movies").findOne({ _id: userId });
+    const result = await Mongoclient
+    .db("test")
+    .collection("user_movies")
+    .findOne({ _id: userId });
 
     if (result){
         console.log(`Found a movie in the collection with the user ID "${userId}"`);

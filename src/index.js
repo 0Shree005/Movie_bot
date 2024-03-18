@@ -10,6 +10,10 @@ import { Client, IntentsBitField }  from 'discord.js';
 import addCmd from './utils/Custom_Commands/addCmd.js';
 // "/watchlist"
 import watchlistCmd from './utils/Custom_Commands/watchlistCmd.js';
+// "/delete_Entire_WatchList"
+import deleteWatchlistCmd from './utils/Custom_Commands/deleteWatchlistCmd.js';
+// "/delete"
+import deleteCmd from './utils/Custom_Commands/deleteCmd.js';
 
 /**
  * Initialising Discord Permissions
@@ -46,6 +50,17 @@ client.on('interactionCreate', async (interaction) => {
     if (interaction.commandName === 'watchlist') {
         await watchlistCmd(interaction, userId);
     }
+
+    // "/delete_Entire_WatchList"
+    if (interaction.commandName === 'delete_watchlist') {
+        await deleteWatchlistCmd(interaction, userId);
+    }
+ 
+    // "/delete"
+    if (interaction.commandName === 'delete') {
+        await deleteCmd(interaction, userId, userMovieName);
+    } 
+        
 })
 
 client.login(process.env.Discord_token);

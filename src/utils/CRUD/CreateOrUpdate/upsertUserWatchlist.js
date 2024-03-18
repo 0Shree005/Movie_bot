@@ -1,5 +1,5 @@
 // function to create a user watclist if not already created  or push data into watchlist if created
-export default async function upsertMovieByName(client, userId, userSelectedMovie, userSelectedPrefVal, interaction){
+export default async function upsertMovieByName(client, userId, userSelectedMovie, userSelectedPrefVal){
     const result = await client
     .db("test")
     .collection("user_movies")

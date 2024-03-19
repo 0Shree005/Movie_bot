@@ -1,16 +1,15 @@
 import connectToDatabase from '../CRUD/CreateOrUpdate/connectToDatabase.js';
-import findOneUserByName from '../CRUD/find/findOneUserByName.js';
+import getSortedWatchlist from '../CRUD/Read/getSortedWatchlist.js';
 
 // "/watchlist" Command to handle the displaying of user's current watchlist
 export default async function watchlistCmd(interaction, userId) {
     try {
         const dbClient = await connectToDatabase();
-        const result = await findOneUserByName(dbClient, userId);
+        const watchlist = await getSortedWatchlist(dbClient, userId);
 
-        if (result && result[0] && result[1]) {
-            const [movieNames, prefValues] = result;
-            const watchlistItems = movieNames.map((movie, index) => {
-                return `${index + 1}. **${movie}** - **${prefValues[index]}**`;
+        if (watchlist && watchlist.length > 0) {
+            const watchlistItems = watchlist.map((movie, index) => {
+                return `${index + 1}. **${movie.movie_name}** - **${movie.pref_val}**`;
             });
 
             const watchlistMessage = watchlistItems.join('\n');
@@ -19,7 +18,7 @@ export default async function watchlistCmd(interaction, userId) {
             interaction.reply(`<@${userId}> Your watchlist is empty.`);
         }
     } catch (error) {
-        console.log('Error searching for the watchlist:', error);
-        interaction.reply('There was an error while searching for your watchlist. Please try again later.');
+        console.log('Error fetching the watchlist:', error);
+        interaction.reply('There was an error while fetching your watchlist. Please try again later.');
     }
 }

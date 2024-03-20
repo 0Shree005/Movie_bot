@@ -1,22 +1,31 @@
-import connectToDatabase from '../CRUD/CreateOrUpdate/connectToDatabase.js';
-import getSortedWatchlist from '../CRUD/Read/getSortedWatchlist.js';
+import dotenv from 'dotenv';
+import { EmbedBuilder } from "discord.js";
+import connectToDatabase from '../CRUD/Create/connectToDatabase.js';
+import getSortedWatchlist from '../CRUD/Read/aggregation_pipeline/getSortedWatchlist.js';
 
-// "/watchlist" Command to handle the displaying of user's current watchlist
-export default async function watchlistCmd(interaction, userId) {
+dotenv.config();
+
+export default async function watchlistCmd(interaction, serverId, userId) {
     try {
         const dbClient = await connectToDatabase();
-        const watchlist = await getSortedWatchlist(dbClient, userId);
+        const watchlist = await getSortedWatchlist(dbClient, serverId, userId);
+
+        const embed = new EmbedBuilder()
+            .setColor('Random') 
+            .setTitle('Your Watchlist')
+            .setTimestamp();
 
         if (watchlist && watchlist.length > 0) {
-            const watchlistItems = watchlist.map((movie, index) => {
-                return `${index + 1}. **${movie.movie_name}** - **${movie.pref_val}**`;
+            const watchlistItems = watchlist.slice(0, 25).map((movie, index) => {
+                return { name: `${index + 1}. ${movie.movie_name}`, value: `Preference: *${movie.pref_val}*`, inline: false };
             });
 
-            const watchlistMessage = watchlistItems.join('\n');
-            interaction.reply(`<@${userId}> Your current watchlist {Movie - Preference}:\n${watchlistMessage}`);
+            embed.addFields(...watchlistItems);
         } else {
-            interaction.reply(`<@${userId}> Your watchlist is empty.`);
+            embed.setDescription('Your watchlist is empty.');
         }
+
+        await interaction.reply({ content: `<@${userId}>`, embeds: [embed], ephemeral: true  });
     } catch (error) {
         console.log('Error fetching the watchlist:', error);
         interaction.reply('There was an error while fetching your watchlist. Please try again later.');

@@ -12,8 +12,10 @@ import addCmd from './utils/Custom_Commands/addCmd.js';
 import watchlistCmd from './utils/Custom_Commands/watchlistCmd.js';
 // "/delete_Entire_WatchList"
 import deleteWatchlistCmd from './utils/Custom_Commands/deleteWatchlistCmd.js';
-// "/delete"
-import deleteCmd from './utils/Custom_Commands/deleteCmd.js';
+// "/recommend"
+import recommendCmd from './utils/Custom_Commands/recommendCmd.js';
+// "/help"
+import helpCmd from './utils/Custom_Commands/helpCmd.js';
 
 /**
  * Initialising Discord Permissions
@@ -37,30 +39,37 @@ client.on('interactionCreate', async (interaction) => {
     if (!interaction.isChatInputCommand()) 
         return;
 
+    const serverId = interaction.guild.id;
     const userId = interaction.user.id
+    const globalName = interaction.user.globalName;
     const userMovieName = interaction.options.getString('movie_name');
     const userMoviePref = interaction.options.getNumber('preference_value');
-    
+
     // "/add"
     if (interaction.commandName === 'add'){
-        await addCmd(interaction, userId, userMovieName, userMoviePref);
+        await addCmd(interaction, serverId, userId, globalName, userMovieName, userMoviePref);
     }
 
     // "/watchlist"
     if (interaction.commandName === 'watchlist') {
-        await watchlistCmd(interaction, userId);
+        await watchlistCmd(interaction, serverId, userId);
     }
 
     // "/delete_Entire_WatchList"
     if (interaction.commandName === 'delete_watchlist') {
-        await deleteWatchlistCmd(interaction, userId);
+        await deleteWatchlistCmd(interaction, serverId, userId);
     }
  
-    // "/delete"
-    if (interaction.commandName === 'delete') {
-        await deleteCmd(interaction, userId, userMovieName);
+    // "/recommend"
+    if (interaction.commandName === 'recommend') {
+        await recommendCmd(interaction, serverId);
     } 
-        
+
+    // "/help"
+    if (interaction.commandName === 'help') {
+        await helpCmd(interaction);
+    } 
+    
 })
 
-client.login(process.env.Discord_token);
+client.login(process.env.DISCORD_TOKEN);

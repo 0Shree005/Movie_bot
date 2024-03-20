@@ -1,5 +1,4 @@
-
-export default async function getSortedWatchlist(client, userId) {
+export default async function getSortedWatchlist(client, serverId, userId) {
     const pipeline = [
         { $match: { _id: userId } },
         { $unwind: "$watchlist" },
@@ -8,7 +7,7 @@ export default async function getSortedWatchlist(client, userId) {
 
     const result = await client
         .db("test")
-        .collection("user_movies")
+        .collection(serverId)
         .aggregate(pipeline)
         .toArray();
 

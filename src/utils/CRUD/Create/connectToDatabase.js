@@ -3,7 +3,7 @@ import { MongoClient }  from 'mongodb';
 
 // Database connection function
 export default async function connectToDatabase() {
-    const uri = process.env.DATABASE;
+    const uri = process.env.DATABASE_URI;
     const Mongoclient = new MongoClient(uri);
     try {
         await Mongoclient.connect();
@@ -11,6 +11,6 @@ export default async function connectToDatabase() {
         return Mongoclient;
     } catch (error) {
         console.error('Error connecting to the database:', error);
-        throw error; // Rethrow the error to handle it elsewhere
+        throw error; 
     }
 }
